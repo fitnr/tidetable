@@ -10,7 +10,7 @@
 
 import re
 from csv import DictWriter
-from datetime import datetime
+from datetime import date, datetime
 import requests
 import warnings
 
@@ -94,6 +94,7 @@ class TideTable(list):
 
         if time_zone is not None:
             params['timeZone'] = time_zone
+            self._tz = time_zone
 
         referer = {
             'Referer': '{}?Stationid={}'.format(BASE_URL, stationid)
@@ -101,6 +102,7 @@ class TideTable(list):
 
         if year:
             params['bdate'] = '{:4}0101'.format(year)
+            self.year = year
 
         r = requests.get(BASE_URL, params=params, headers=referer)
         lines = r.iter_lines()
@@ -130,7 +132,10 @@ class TideTable(list):
         r.close()
 
     def __repr__(self):
-        return 'TideTable(stationid={})'.format(self.stationid)
+        year = ', year={}'.format(self.year) if hasattr(self, 'year') else ''
+        tz = ', time_zone={}'.format(self._tz) if hasattr(self, '_tz') else ''
+
+        return 'tidetable.TideTable(stationid={}{year}{tz})'.format(self.stationid, year=year, tz=tz)
 
     def write_csv(self, filename):
         fields = ['datetime', 'pred_ft', 'pred_cm', 'high_low']
