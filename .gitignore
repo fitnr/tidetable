@@ -34,3 +34,5 @@ htmlcov/
 .coverage
 .cache
 coverage.xml
+
+README.rst

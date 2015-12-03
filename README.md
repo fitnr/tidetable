@@ -3,6 +3,8 @@ tidetable
 
 Tidetable is a Python module for downloading annual tide prediction tables from the [NOAA Tides & Currents](http://tidesandcurrents.noaa.gov) site.
 
+Install with `pip install tidetable`.
+
 ## Basics
 
 First, [identify your tide station](http://tidesandcurrents.noaa.gov/tide_predictions.html) and it's Station ID number.
