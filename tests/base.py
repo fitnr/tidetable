@@ -11,16 +11,26 @@
 import unittest
 import tidetable
 from datetime import datetime
+from sys import version_info
+
+if version_info.major > 2:
+    from io import StringIO as IO
+else:
+    from io import BytesIO as IO
 
 class test(unittest.TestCase):
     def testDownloadTable(self):
         t = tidetable.get(8517921)
         assert isinstance(t, tidetable.TideTable)
         assert isinstance(t, list)
+
         try:
             assert isinstance(t.disclaimer, unicode)
         except NameError:
             assert isinstance(t.disclaimer, str)
+
+        io = IO()
+        t.write_csv(io)
 
     def testBeginDate(self):
         t = tidetable.get(8517921, begin=datetime(2016, 1, 1))

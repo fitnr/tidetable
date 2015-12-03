@@ -142,8 +142,16 @@ class TideTable(list):
     def write_csv(self, filename):
         fields = ['datetime', 'pred_ft', 'pred_cm', 'high_low']
 
-        with open(filename, 'w') as f:
+        try:
+            if hasattr(filename, 'write'):
+                f = filename
+            else:
+                f = open(filename, 'w')
+
             writer = DictWriter(f, fields)
             writer.writeheader()
-
             writer.writerows(self)
+
+        finally:
+            if f != filename:
+                f.close()
