@@ -33,7 +33,7 @@ class test(unittest.TestCase):
         t.write_csv(io)
 
     def testBeginDate(self):
-        t = tidetable.get(8517921, begin=datetime(2016, 1, 1))
+        t = tidetable.get(8517921, year=2016)
 
         try:
             assert t[0]['datetime'].year == 2015

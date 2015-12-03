@@ -24,6 +24,19 @@ TideTable(stationid=8416092)
 'MLLW'
 ````
 
+### Time frames
+
+By default, the NOAA returns the tide prediction table for the current year. To get years in the recent past or future, use the `year` keyword argument. It seems that roughly five years in the past and two years in the future are available. There isn't a way to get smaller time ranges of predictions than a full year.
+
+````python
+>>> import tidetable
+>>> table = tidetable.get(8416092, year=2016)
+>>> table[4]['datetime']
+datetime.datetime(2016, 1, 1, 3, 39)
+````
+
+(Note that the first few rows returned may be for the previous year.)
+
 ### Writing
 
 The `TideTable` object has a write_csv method. It accepts either a file name or any file-like object.

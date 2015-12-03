@@ -80,11 +80,11 @@ class TideTable(list):
     Object also includes some metadata about the predictions.
 
     :stationid str Tide observation station
-    :begin datetime date to begin predictions. Default is previous December 31
-    :timezone int Time zone for reporting results. Use one of tidetable.GMT, tidetable.LOCAL_STANDARD_TIME, tidetable.LOCAL_TIME. GMT returns results in Greenwich Mean time, LOCAL_STANDARD_TIME returns time in the local standard time zone (ignoring daylight savings), and LOCAL_TIME returns times in a mix of daylight and standard times.
+    :year int year to fetch predictions for. Default is current year
+    :time_zone int Time zone for reporting results. Use one of tidetable.GMT, tidetable.LOCAL_STANDARD_TIME, tidetable.LOCAL_TIME. GMT returns results in Greenwich Mean time, LOCAL_STANDARD_TIME returns time in the local standard time zone (ignoring daylight savings), and LOCAL_TIME returns times in a mix of daylight and standard times.
     """
 
-    def __init__(self, stationid, begin=None, end=None, time_zone=None):
+    def __init__(self, stationid, year=None, time_zone=None):
         params = {
             "datatype": "Annual TXT",
             "timeUnits": 1
@@ -99,15 +99,8 @@ class TideTable(list):
             'Referer': '{}?Stationid={}'.format(BASE_URL, stationid)
         }
 
-        if end and begin and end < begin:
-            end, begin = begin, end
-
-        if begin:
-            params['bdate'] = begin.strftime('%Y%m%d')
-            params['edate'] = '{}{}'.format(begin.year + 1, begin.strftime('%m%d'))
-
-        if end:
-            params['edate'] = end.strftime('%Y%m%d')
+        if year:
+            params['bdate'] = '{:4}0101'.format(year)
 
         r = requests.get(BASE_URL, params=params, headers=referer)
         lines = r.iter_lines()
