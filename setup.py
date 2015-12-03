@@ -14,7 +14,7 @@ setup(
     name='tidetable',
     version='0.1.0',
     description='Thin API for NOAA tide tables',
-    long_description='''Thin API for NOAA tide tables''',
+    long_description=open('README.md').read(),
     keywords='noaa',
     author='Neil Freeman',
     author_email='contact@fakeisthenewreal.org',
