@@ -9,8 +9,10 @@
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
 import re
+from csv import DictWriter
 from datetime import datetime
 import requests
+import warnings
 
 BASE_URL = "http://tidesandcurrents.noaa.gov/noaatidepredictions/NOAATidesFacade.jsp"
 
@@ -37,19 +39,47 @@ BASE_URL = "http://tidesandcurrents.noaa.gov/noaatidepredictions/NOAATidesFacade
 # TimeOffsetLow=-12
 # TimeOffsetHigh=-18
 # pageview=dayly
-# print_download=true
-# Threshold=
-# thresholdvalue=
 
-
-GMT = 0 
+GMT = 0
 LOCAL_STANDARD_TIME = 1
 LOCAL_TIME = 2
 
+
 def get(stationid, **kwargs):
-    return TideTable(stationid, **kwargs)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return TideTable(stationid, **kwargs)
+
+
+def parse(lines):
+    tab = re.compile(r'\t+')
+    hed = next(lines).decode('ascii')
+    header = [x.strip() for x in re.split(tab, hed)]
+    results = list()
+
+    for row in lines:
+        result = {}
+        prelim = dict(zip(header, re.split(tab, row.decode('ascii'))))
+
+        try:
+            dt = prelim['Date'] + ' ' + prelim['Time']
+            result['datetime'] = datetime.strptime(dt, '%Y/%m/%d %H:%M')
+
+            result['pred_ft'] = float(prelim['Pred(Ft)'])
+            result['pred_cm'] = float(prelim['Pred(cm)'])
+            result['high_low'] = prelim['High/Low']
+
+        except KeyError as e:
+            continue
+
+        if len(result) > 0:
+            results.append(result)
+
+    return results
+
 
 class TideTable(list):
+
     """
     Downloads an NOAA tide table, returning a list of predictions.
     Object also includes some metadata about the predictions.
@@ -68,6 +98,10 @@ class TideTable(list):
 
         self.stationid = params['Stationid'] = stationid
 
+        referer = {
+            'Referer': '{}?Stationid={}'.format(BASE_URL, stationid)
+        }
+
         if end and begin and end < begin:
             end, begin = begin, end
 
@@ -78,51 +112,41 @@ class TideTable(list):
         if end:
             params['edate'] = end.strftime('%Y%m%d')
 
-        referer = {
-            'Referer': '{}?Stationid={}'.format(BASE_URL, stationid)
-        }
-
-        self.r = r = requests.get(BASE_URL, params=params, headers=referer)
+        r = requests.get(BASE_URL, params=params, headers=referer)
         lines = r.iter_lines()
 
+        setattr(self, 'url', r.url)
+        setattr(self, 'raw', r.text)
+
         for line in lines:
+            line = line.decode('ascii')
+
             if ': ' in line:
                 key, value = line.split(': ', 1)
+
+                # reserved name
+                if key.lower() == 'from':
+                    key = 'period'
+
                 setattr(self, key.replace(' ', '_').lower(), value.strip())
 
             elif line.strip() == '':
                 break
 
-        items = self._parse(lines)
+        items = parse(lines)
 
         super(TideTable, self).__init__(items)
 
-    def _parse(self, lines):
-        tab = re.compile(r'\t+')
-        hed = next(lines)
-
-        header = [x.strip() for x in re.split(tab, hed)]
-        results = list()
-
-        for row in lines:
-            result = {}
-            prelim = dict(zip(header, re.split(tab, row)))
-
-            try:
-                dt = prelim['Date'] + ' ' + prelim['Time']
-
-                result['datetime'] = datetime.strptime(dt, '%Y/%m/%d %H:%M')
-
-                result['pred_ft'] = float(prelim['Pred(Ft)'])
-                result['pred_cm'] = float(prelim['Pred(cm)'])
-                result['high_low'] = prelim['High/Low']
-
-            except KeyError as e:
-                pass
-
-            results.append(result)
-
-        return results
+        r.close()
 
     def __repr__(self):
         return 'TideTable(stationid={})'.format(self.stationid)
+
+    def write_csv(self, filename):
+        fields = ['datetime', 'pred_ft', 'pred_cm', 'high_low']
+
+        with open(filename, 'w') as f:
+            writer = DictWriter(f, fields)
+            writer.writeheader()
+
+            writer.writerows(self)

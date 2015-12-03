@@ -8,13 +8,13 @@
 # http://www.opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='tidetable',
     version='0.1.0',
-    description='Thin API FOR ',
-    long_description='''Thin API for ''',
+    description='Thin API for NOAA tide tables',
+    long_description='''Thin API for NOAA tide tables''',
     keywords='noaa',
     author='Neil Freeman',
     author_email='contact@fakeisthenewreal.org',
@@ -31,14 +31,12 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Operating System :: OS Independent',
     ],
-    packages=find_packages(),
+    packages=['tidetable'],
     include_package_data=False,
     install_requires=[
         'requests'
     ],
-    extras_require={
-        'tests': [],
-    },
+    test_suite='tests',
     entry_points={
         'console_scripts': [
             # 'tidetable=tidetable.cli:main',

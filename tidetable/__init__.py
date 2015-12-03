@@ -12,4 +12,4 @@ __version__ = '0.1.0'
 
 __all__ = ['tidetable']
 
-from tidetable import get
+from .tidetable import get, TideTable

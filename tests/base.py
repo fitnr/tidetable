@@ -8,8 +8,29 @@
 # http://www.opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
-from unittest import TestCase
+import unittest
+import tidetable
+from datetime import datetime
 
+class test(unittest.TestCase):
+    def testDownloadTable(self):
+        t = tidetable.get(8517921)
+        assert isinstance(t, tidetable.TideTable)
+        assert isinstance(t, list)
+        try:
+            assert isinstance(t.disclaimer, unicode)
+        except NameError:
+            assert isinstance(t.disclaimer, str)
 
-class TestCase(TestCase):
-    pass
+    def testBeginDate(self):
+        t = tidetable.get(8517921, begin=datetime(2016, 1, 1))
+
+        try:
+            assert t[0]['datetime'].year == 2015
+            assert t[0]['datetime'].month == 12
+            assert t[0]['datetime'].day == 31
+        except:
+            print (t.raw)
+
+if __name__ == '__main__':
+    unittest.main()
