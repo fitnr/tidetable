@@ -17,7 +17,7 @@ except:
 
 setup(
     name='tidetable',
-    version='0.1.0',
+    version='0.1.1',
     description='Thin API for NOAA tide tables',
     long_description=readme,
     keywords='noaa',
