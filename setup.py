@@ -10,11 +10,16 @@
 
 from setuptools import setup
 
+try:
+    readme = open('README.rst').read()
+except:
+    readme = open('README.md').read()
+
 setup(
     name='tidetable',
     version='0.1.0',
     description='Thin API for NOAA tide tables',
-    long_description=open('README.rst').read(),
+    long_description=readme,
     keywords='noaa',
     author='Neil Freeman',
     author_email='contact@fakeisthenewreal.org',

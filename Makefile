@@ -10,7 +10,8 @@ install: README.rst
 	python setup.py install
 
 README.rst: README.md
-	pandoc $< -o $@ || touch $@
+	- pandoc $< -o $@
+	@touch $@
 
 upload:
 	rm -rf dist
