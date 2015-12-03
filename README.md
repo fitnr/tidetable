@@ -7,21 +7,30 @@ Install with `pip install tidetable`.
 
 ## Basics
 
-First, [identify your tide station](http://tidesandcurrents.noaa.gov/tide_predictions.html) and it's Station ID number.
+First, get the Station ID for your tide station from the [NOAA Tides & Currents site](http://tidesandcurrents.noaa.gov/tide_predictions.html).
 
 Then, use the `get` method to download the table. This returns a `TideTable` object, which is just a `list` with a few additional metadata parameters. 
 
+In this example, we use a tide station in Maine:
 ````python
 >>> import tidetable
 >>> table = tidetable.get(8416092)
 >>> table
-TideTable(stationid=8416092)
+tidetable.TideTable(stationid=8416092)
 >>> table[0]
 {'pred_cm': 149.0, 'datetime': datetime.datetime(2014, 12, 31, 3, 44), 'pred_ft': 4.9, 'high_low': 'H'}
->>> t.stationid, t.stationname
-('8416092', 'Monhegan Island')
+````
+
+The `TideTable` object's metadata includes some location data, information about the parent tide station, and error intervals: 
+````python
+>>> table.stationname, table.state
+('Monhegan Island', 'ME')
 >>> table.datum
 'MLLW'
+>>> table.referencetostationid
+'8418150'
+>>> table.timeoffsetlow, table.timeoffsethigh
+('-9', '-13')
 ````
 
 ### Time frames
@@ -31,6 +40,8 @@ By default, the NOAA returns the tide prediction table for the current year. To 
 ````python
 >>> import tidetable
 >>> table = tidetable.get(8416092, year=2016)
+>>> table
+tidetable.TideTable(stationid=8416092)
 >>> table[4]['datetime']
 datetime.datetime(2016, 1, 1, 3, 39)
 ````
