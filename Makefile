@@ -15,6 +15,8 @@ README.rst: README.md
 	@touch $@
 
 deploy: README.rst
+	git push
+	git push --tags
 	rm -rf dist
 	python setup.py bdist_wheel
 	python3 setup.py bdist_wheel
