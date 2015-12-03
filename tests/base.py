@@ -32,5 +32,14 @@ class test(unittest.TestCase):
         except:
             print (t.raw)
 
+    def testTimeZone(self):
+        t = tidetable.get(8517921, time_zone=tidetable.GMT)
+        assert t.time_zone == 'GMT'
+
+        s = tidetable.get(8517921, time_zone=tidetable.LOCAL_STANDARD_TIME)
+        assert s.time_zone == 'LST'
+
+        assert t[0]['datetime'] != s[0]['datetime']
+
 if __name__ == '__main__':
     unittest.main()

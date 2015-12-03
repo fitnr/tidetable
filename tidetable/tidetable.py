@@ -40,11 +40,6 @@ BASE_URL = "http://tidesandcurrents.noaa.gov/noaatidepredictions/NOAATidesFacade
 # TimeOffsetHigh=-18
 # pageview=dayly
 
-GMT = 0
-LOCAL_STANDARD_TIME = 1
-LOCAL_TIME = 2
-
-
 def get(stationid, **kwargs):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -89,14 +84,16 @@ class TideTable(list):
     :timezone int Time zone for reporting results. Use one of tidetable.GMT, tidetable.LOCAL_STANDARD_TIME, tidetable.LOCAL_TIME. GMT returns results in Greenwich Mean time, LOCAL_STANDARD_TIME returns time in the local standard time zone (ignoring daylight savings), and LOCAL_TIME returns times in a mix of daylight and standard times.
     """
 
-    def __init__(self, stationid, begin=None, end=None, timezone=None):
+    def __init__(self, stationid, begin=None, end=None, time_zone=None):
         params = {
             "datatype": "Annual TXT",
-            "timeUnits": 1,
-            'timeZone': timezone or LOCAL_TIME
+            "timeUnits": 1
         }
 
         self.stationid = params['Stationid'] = stationid
+
+        if time_zone is not None:
+            params['timeZone'] = time_zone
 
         referer = {
             'Referer': '{}?Stationid={}'.format(BASE_URL, stationid)

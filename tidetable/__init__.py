@@ -12,4 +12,8 @@ __version__ = '0.1.0'
 
 __all__ = ['tidetable']
 
+GMT = 0
+LOCAL_STANDARD_TIME = 1
+LOCAL_TIME = 2
+
 from .tidetable import get, TideTable
