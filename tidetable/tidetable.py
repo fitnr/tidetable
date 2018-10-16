@@ -10,35 +10,15 @@
 
 import re
 from csv import DictWriter
-from datetime import date, datetime
-import requests
+from datetime import datetime
 import warnings
+import requests
 
-BASE_URL = "http://tidesandcurrents.noaa.gov/noaatidepredictions/NOAATidesFacade.jsp"
+GMT = 'GMT'
+LOCAL_STANDARD_TIME = 'LST'
+DATUMS = "STND", "MHHW", "MHW", "MTL", "MSL", "MLW", "MLLW"
+BASE_URL = "https://tidesandcurrents.noaa.gov/cgi-bin/predictiondownload.cgi"
 
-# All the possible arguments:
-#
-# http://tidesandcurrents.noaa.gov/noaatidepredictions/NOAATidesFacade.jsp?datatype=Annual+TXT
-# Stationid=8517921
-# bdate=20151203
-# edate=20151204
-# timelength=daily
-# timeZone=2
-# dataUnits=1
-# interval=
-# StationName=GOWANUS+BAY
-# Stationid_=8517921
-# state=NY
-# primary=Subordinate
-# datum=MLLW
-# timeUnits=2
-# ReferenceStationName=The+Battery
-# ReferenceStation=8518750
-# HeightOffsetLow=*0.95
-# HeightOffsetHigh=*+1.03
-# TimeOffsetLow=-12
-# TimeOffsetHigh=-18
-# pageview=dayly
 
 def get(stationid, **kwargs):
     with warnings.catch_warnings():
@@ -48,6 +28,7 @@ def get(stationid, **kwargs):
 
 def parse(lines):
     tab = re.compile(r'\t+')
+
     hed = next(lines).decode('ascii')
     header = [x.strip() for x in re.split(tab, hed)]
     results = list()
@@ -84,25 +65,35 @@ class TideTable(list):
     :time_zone int Time zone for reporting results. Use one of tidetable.GMT, tidetable.LOCAL_STANDARD_TIME, tidetable.LOCAL_TIME. GMT returns results in Greenwich Mean time, LOCAL_STANDARD_TIME returns time in the local standard time zone (ignoring daylight savings), and LOCAL_TIME returns times in a mix of daylight and standard times.
     """
 
-    def __init__(self, stationid, year=None, time_zone=None):
+    def __init__(self, stationid, year=None, time_zone=None, datum=None):
+        # https://tidesandcurrents.noaa.gov/cgi-bin/predictiondownload.cgi
+        # stnid=1611400&threshold=&thresholdDirection=greaterThan&bdate=2018
+        # timezone=GMT
+        # datum=STND
+        # clock=24hour
+        # type=txt
+        # annual=true
+        self.datum = (datum or DATUMS[0]).upper()
+        if self.datum not in DATUMS:
+            self.datum = DATUMS[0]
+
+        self._tz = time_zone or GMT
+
+        self.stationid = stationid
+
+        self.year = year or datetime.now().year
+
         params = {
-            "datatype": "Annual TXT",
-            "timeUnits": 1
+            "type": "txt",
+            "clock": "24hour",
+            "annual": "true",
+            "datum": self.datum,
+            "timezone": self._tz,
+            "stnid": self.stationid,
+            "bdate": self.year
         }
 
-        self.stationid = params['Stationid'] = stationid
-
-        if time_zone is not None:
-            params['timeZone'] = time_zone
-            self._tz = time_zone
-
-        referer = {
-            'Referer': '{}?Stationid={}'.format(BASE_URL, stationid)
-        }
-
-        if year:
-            params['bdate'] = '{:4}0101'.format(year)
-            self.year = year
+        referer = {'Referer': BASE_URL}
 
         r = requests.get(BASE_URL, params=params, headers=referer)
         lines = r.iter_lines()
