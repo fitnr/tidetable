@@ -66,7 +66,13 @@ class TideTable(list):
 
     :stationid str Tide observation station
     :year int year to fetch predictions for. Default is current year
-    :time_zone int Time zone for reporting results. Use one of tidetable.GMT, tidetable.LOCAL_STANDARD_TIME, tidetable.LOCAL_TIME. GMT returns results in Greenwich Mean time, LOCAL_STANDARD_TIME returns time in the local standard time zone (ignoring daylight savings), and LOCAL_TIME returns times in a mix of daylight and standard times.
+    :time_zone int Time zone for reporting results.
+        Use one of tidetable.GMT, tidetable.LOCAL_STANDARD_TIME, tidetable.LOCAL_TIME. GMT returns
+        results in Greenwich Mean time, LOCAL_STANDARD_TIME returns time in the local standard
+        time zone (ignoring daylight savings), and LOCAL_TIME returns times in a mix of daylight
+        and standard times.
+    :datum str A vertical datum. Not all tide stations report in all datums, empty results may
+        reflect an unspoorted datum.
     """
 
     def __init__(self, stationid, year=None, time_zone=None, datum=None):
@@ -82,8 +88,8 @@ class TideTable(list):
             self.datum = DATUMS[0]
 
         self._tz = time_zone or GMT
-        self.stationid = stationid
-        self.year = year or datetime.now().year
+        self._stationid = stationid
+        self._year = year or datetime.now().year
 
         params = {
             "type": "txt",
@@ -113,15 +119,21 @@ class TideTable(list):
                 if key.lower() == 'from':
                     key = 'period'
 
-                setattr(self, key.replace(' ', '_').lower(), value.strip())
+                try:
+                    setattr(self, key.replace(' ', '_').lower(), value.strip())
+                except AttributeError:
+                    pass
 
             elif line.strip() == '':
                 break
 
-        items = parse(lines)
+        try:
+            items = parse(lines)
+        except StopIteration:
+            # We didn't get any results. Fail gracefully.
+            items = []
 
         super(TideTable, self).__init__(items)
-
         r.close()
 
     def __repr__(self):
@@ -129,6 +141,18 @@ class TideTable(list):
         tz = ', time_zone={}'.format(self._tz) if hasattr(self, '_tz') else ''
 
         return 'tidetable.TideTable(stationid={}{year}{tz})'.format(self.stationid, year=year, tz=tz)
+
+    @property
+    def stationid(self):
+        return self._stationid
+
+    @property
+    def year(self):
+        return self._year
+
+    @property
+    def time_zone(self):
+        return self._tz
 
     def write_csv(self, filename):
         fields = ['datetime', 'pred_ft', 'pred_cm', 'high_low']

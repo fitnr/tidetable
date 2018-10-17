@@ -10,6 +10,9 @@
 install: README.rst
 	python setup.py install
 
+test:
+	python setup.py test
+
 README.rst: README.md
 	- pandoc $< -o $@
 	@touch $@
