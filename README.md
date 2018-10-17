@@ -58,6 +58,24 @@ table = tidetable.get(8416092)
 table.write_csv('tide_table.csv')
 ````
 
+### Command line tool
+
+Tidetable has a simple command line interface, which can be used when running the module as a script:
+```bash
+$ python -m tidetable --help
+usage: tidetable [-h] [--year YEAR] [--datum {STND,MHHW,MHW,MTL,MSL,MLW,MLLW}]
+                 station-id
+
+positional arguments:
+  station-id            NOAA station id
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --year YEAR           year
+  --datum {STND,MHHW,MHW,MTL,MSL,MLW,MLLW}
+                        output datum
+```
+
 ### Time zones
 
 As you can see, `TideTable` is a list of `dict`s, each of which has a `datetime`, a prediction in feet and cm, and a high-or-low flag. The predictions are relative to the `datum`, which in this case is MLLW, or the mean lower low water level. Note that MLLW is different from sea level.

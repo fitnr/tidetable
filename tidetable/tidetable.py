@@ -9,10 +9,14 @@
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
 import re
+import errno
 from csv import DictWriter
 from datetime import datetime
 import warnings
+from signal import signal, SIGPIPE, SIG_DFL
 import requests
+
+signal(SIGPIPE, SIG_DFL)
 
 GMT = 'GMT'
 LOCAL_STANDARD_TIME = 'LST'
@@ -78,9 +82,7 @@ class TideTable(list):
             self.datum = DATUMS[0]
 
         self._tz = time_zone or GMT
-
         self.stationid = stationid
-
         self.year = year or datetime.now().year
 
         params = {
@@ -138,8 +140,15 @@ class TideTable(list):
                 f = open(filename, 'w')
 
             writer = DictWriter(f, fields)
-            writer.writeheader()
-            writer.writerows(self)
+            try:
+                writer.writeheader()
+                writer.writerows(self)
+            except IOError as e:
+                if e.errno == errno.EPIPE:
+                    pass
+
+            except BrokenPipeError as e:
+                pass
 
         finally:
             if f != filename:
