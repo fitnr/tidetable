@@ -7,7 +7,7 @@
 # Licensed under the GPL-3.0 license:
 # http://www.opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
-
+import os
 import re
 import errno
 from csv import DictWriter
@@ -163,7 +163,7 @@ class TideTable(list):
             else:
                 f = open(filename, 'w')
 
-            writer = DictWriter(f, fields)
+            writer = DictWriter(f, fields, lineterminator=os.linesep)
             try:
                 writer.writeheader()
                 writer.writerows(self)
