@@ -20,7 +20,7 @@ signal(SIGPIPE, SIG_DFL)
 
 GMT = 'GMT'
 LOCAL_STANDARD_TIME = 'LST'
-DATUMS = "STND", "MHHW", "MHW", "MTL", "MSL", "MLW", "MLLW"
+DATUMS = "STND", "NAVD", "MHHW", "MHW", "MTL", "MSL", "MLW", "MLLW"
 BASE_URL = "https://tidesandcurrents.noaa.gov/cgi-bin/predictiondownload.cgi"
 
 
