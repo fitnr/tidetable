@@ -14,7 +14,7 @@ Then, use the `get` method to download the table. This returns a `TideTable` obj
 In this example, we use a tide station in Maine:
 ````python
 >>> import tidetable
->>> table = tidetable.get(8416092)
+>>> table = tidetable.get(8416092, datum='MLLW')
 >>> table
 tidetable.TideTable(stationid=8416092)
 >>> table[0]
@@ -39,7 +39,7 @@ By default, the NOAA returns the tide prediction table for the current year. To 
 
 ````python
 >>> import tidetable
->>> table = tidetable.get(8416092, year=2016)
+>>> table = tidetable.get(8416092, year=2019, datum='MLLW')
 >>> table
 tidetable.TideTable(stationid=8416092)
 >>> table[4]['datetime']
@@ -54,7 +54,7 @@ The `TideTable` object has a write_csv method. It accepts either a file name or 
 
 ````python
 import tidetable
-table = tidetable.get(8416092)
+table = tidetable.get(8416092, datum='MLLW')
 table.write_csv('tide_table.csv')
 ````
 
